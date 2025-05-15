@@ -7,6 +7,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import json
+import altair as alt
 
 # Iniciar sessão
 if "logado" not in st.session_state:
@@ -97,7 +98,7 @@ abas_disponiveis = ["📤 Registrar Saída"]
 # Nova aba: Visão Geral com gráfico
 if "📊 Visão Geral" not in st.session_state.get("abas", []):
     if st.session_state["logado"]:
-        st.session_state["abas"] = ["📤 Registrar Saída", "📊 Visão Geral", "📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas", "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover", "🔐 Login Admin"]
+        st.session_state["abas"] = ["📤 Registrar Saída", "📊 Visão Geral", "📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas", "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover"]
     else:
         st.session_state["abas"] = ["📤 Registrar Saída", "🔐 Login Admin"]
 
