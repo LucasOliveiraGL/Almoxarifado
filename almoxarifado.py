@@ -94,14 +94,47 @@ st.title("📦 Sistema de Almoxarifado")
 # Define abas permitidas
 abas_disponiveis = ["📤 Registrar Saída"]
 
-if st.session_state["logado"]:
-    abas_disponiveis += [
-        "📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas",
-        "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover"
-    ]
+# Nova aba: Visão Geral com gráfico
+if "📊 Visão Geral" not in st.session_state.get("abas", []):
+    if st.session_state["logado"]:
+        st.session_state["abas"] = ["📤 Registrar Saída", "📊 Visão Geral", "📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas", "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover", "🔐 Login Admin"]
+    else:
+        st.session_state["abas"] = ["📤 Registrar Saída", "🔐 Login Admin"]
+
+aba = st.sidebar.radio("Menu", st.session_state["abas"])
 
 abas_disponiveis += ["🔐 Login Admin"]
 aba = st.sidebar.radio("Menu", abas_disponiveis)
+
+if aba == "📊 Visão Geral":
+    st.title("📊 Visão Geral de Movimentações")
+    df_entradas = pd.read_csv(CAMINHO_ENTRADAS, encoding="utf-8-sig")
+    df_saidas = pd.read_csv(CAMINHO_SAIDAS, encoding="utf-8-sig")
+
+    if df_entradas.empty and df_saidas.empty:
+        st.warning("Sem dados de movimentações para exibir.")
+    else:
+        df_entradas["data"] = pd.to_datetime(df_entradas["data"])
+        df_saidas["data"] = pd.to_datetime(df_saidas["data"])
+
+        entradas_mes = df_entradas.groupby(df_entradas["data"].dt.to_period("M"))[["quantidade"]].sum().reset_index()
+        entradas_mes["data"] = entradas_mes["data"].dt.to_timestamp()
+        entradas_mes["tipo"] = "Entrada"
+
+        saidas_mes = df_saidas.groupby(df_saidas["data"].dt.to_period("M"))[["quantidade"]].sum().reset_index()
+        saidas_mes["data"] = saidas_mes["data"].dt.to_timestamp()
+        saidas_mes["tipo"] = "Saída"
+
+        df_total = pd.concat([entradas_mes, saidas_mes])
+
+        grafico = alt.Chart(df_total).mark_bar().encode(
+            x=alt.X("yearmonth(data):T", title="Mês"),
+            y=alt.Y("quantidade:Q", title="Quantidade"),
+            color=alt.Color("tipo:N", title="Movimentação"),
+            tooltip=["data", "quantidade", "tipo"]
+        ).properties(width=700, height=400)
+
+        st.altair_chart(grafico, use_container_width=True)
 
 if aba == "🔐 Login Admin":
     st.subheader("🔐 Login do Administrador")
