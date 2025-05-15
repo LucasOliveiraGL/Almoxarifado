@@ -143,8 +143,8 @@ if aba == "📋 Estoque":
             lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #CCFFCC", subset=["Situação"]
         ), use_container_width=True)
 
-elif aba == "🚚 Registrar Saída":
-    st.subheader("🚚 Registrar Saída de Item")
+elif aba == "📤 Registrar Saída":
+    st.subheader("📤 Registrar Saída de Item")
     df = carregar_estoque()
     if df.empty:
         st.warning("Estoque vazio.")
