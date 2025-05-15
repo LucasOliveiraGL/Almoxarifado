@@ -125,7 +125,7 @@ if aba == "🔐 Login Admin":
         senha = st.text_input("Senha", type="password")
         entrar = st.form_submit_button("Entrar")
         if entrar:
-            if usuario == "admin" and senha == "1234":
+            if usuario == "Bruna" and senha == "Merco.2025":
                 st.session_state["logado"] = True
                 st.success("Login realizado com sucesso!")
                 st.rerun()
