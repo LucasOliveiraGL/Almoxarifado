@@ -49,12 +49,12 @@ def carregar_estoque():
     if not CAMINHO_ESTOQUE.exists():
         baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
     try:
-        df = pd.read_csv(CAMINHO_ESTOQUE)
+        df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
         return df
     except Exception:
-        return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"])
-
+        return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo",
+                                     
 def salvar_estoque(df):
     df.to_csv(CAMINHO_ESTOQUE, index=False)
     upload_para_drive(CAMINHO_ESTOQUE, ID_ESTOQUE)
