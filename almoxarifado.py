@@ -32,7 +32,7 @@ def baixar_csv_do_drive(id_arquivo, destino_local):
     gdown.download(url, destino_local, quiet=True)
 
 def upload_para_drive(file_path, file_id):
-    info = json.loads(st.secrets["gdrive_service_account"])
+    info = st.secrets["gdrive_service_account"]
     creds = service_account.Credentials.from_service_account_info(info, scopes=["https://www.googleapis.com/auth/drive"])
     service = build("drive", "v3", credentials=creds)
     media = MediaFileUpload(file_path, mimetype="text/csv")
