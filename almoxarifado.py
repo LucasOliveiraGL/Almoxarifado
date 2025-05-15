@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
 
-# Caminhos dos arquivos
-CAMINHO_ESTOQUE = "estoque.csv"
-CAMINHO_SAIDAS = "saidas.csv"
-CAMINHO_ENTRADAS = "entradas.csv"
+# Pasta de dados
+PASTA_DADOS = Path("data")
+PASTA_DADOS.mkdir(exist_ok=True)
+
+CAMINHO_ESTOQUE = PASTA_DADOS / "estoque.csv"
+CAMINHO_SAIDAS = PASTA_DADOS / "saidas.csv"
+CAMINHO_ENTRADAS = PASTA_DADOS / "entradas.csv"
 
 # Funções auxiliares
 def carregar_estoque():
