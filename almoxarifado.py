@@ -54,6 +54,7 @@ def carregar_estoque():
         return df
     except Exception:
         return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"])
+        st.write("Conteúdo carregado:", df)
                                      
 def salvar_estoque(df):
     df.to_csv(CAMINHO_ESTOQUE, index=False)
