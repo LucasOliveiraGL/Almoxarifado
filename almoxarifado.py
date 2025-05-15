@@ -41,7 +41,7 @@ def upload_para_drive(file_path, file_id):
 def carregar_estoque():
     if not CAMINHO_ESTOQUE.exists():
         baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
-   #return pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
+    return pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
 
 def salvar_estoque(df):
     df.to_csv(CAMINHO_ESTOQUE, index=False)
