@@ -125,7 +125,7 @@ if aba == "📋 Estoque":
     else:
         df["Situação"] = df.apply(lambda row: "🔴 Baixo Estoque" if row["quantidade"] < row["estoque_minimo"] else "✅ Ok", axis=1)
         st.dataframe(df.style.applymap(
-            lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #CCFFCC", subset=["Situação"]
+            lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #4a4a4a", subset=["Situação"]  #CCFFCC
         ), use_container_width=True)
 
 elif aba == "📤 Registrar Saída":
