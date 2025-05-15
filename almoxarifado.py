@@ -3,6 +3,10 @@ import pandas as pd
 from datetime import datetime
 from pathlib import Path
 
+# Iniciar sessão
+if "logado" not in st.session_state:
+    st.session_state["logado"] = False
+    
 # Pasta de dados
 PASTA_DADOS = Path("data")
 PASTA_DADOS.mkdir(exist_ok=True)
@@ -96,16 +100,37 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
     salvar_entradas(df_entradas)
 
     return "Entrada registrada com sucesso!"
+    
 
 # Interface Streamlit
 st.set_page_config(page_title="Sistema de Almoxarifado", layout="wide")
 st.title("📦 Sistema de Almoxarifado")
 
-aba = st.sidebar.radio("Menu", [
-    "📋 Estoque", "🚚 Registrar Saída", "➕ Registrar Entrada",
-    "📄 Relatório de Saídas", "🧾 Relatório de Entradas",
-    "🆕 Cadastrar Item", "🛠 Editar / Remover"
-])
+# Define abas disponíveis
+abas_disponiveis = ["📤 Registrar Saída"]
+
+if st.session_state["logado"]:
+    abas_disponiveis += [
+        "📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas",
+        "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover"
+    ]
+
+abas_disponiveis += ["🔐 Login Admin"]
+aba = st.sidebar.radio("Menu", abas_disponiveis)
+
+if aba == "🔐 Login Admin":
+    st.subheader("🔐 Login do Administrador")
+    with st.form("form_login"):
+        usuario = st.text_input("Usuário")
+        senha = st.text_input("Senha", type="password")
+        entrar = st.form_submit_button("Entrar")
+        if entrar:
+            if usuario == "admin" and senha == "1234":
+                st.session_state["logado"] = True
+                st.success("Login realizado com sucesso!")
+                st.experimental_rerun()
+            else:
+                st.error("Usuário ou senha inválidos.")
 
 if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
