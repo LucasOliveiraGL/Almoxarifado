@@ -106,7 +106,7 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
 st.set_page_config(page_title="Sistema de Almoxarifado", layout="wide")
 st.title("📦 Sistema de Almoxarifado")
 
-# Define abas disponíveis
+# Define abas permitidas
 abas_disponiveis = ["📤 Registrar Saída"]
 
 if st.session_state["logado"]:
@@ -128,7 +128,7 @@ if aba == "🔐 Login Admin":
             if usuario == "admin" and senha == "1234":
                 st.session_state["logado"] = True
                 st.success("Login realizado com sucesso!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Usuário ou senha inválidos.")
 
