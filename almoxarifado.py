@@ -231,6 +231,7 @@ elif aba == "📤 Registrar Saída":
                 st.success(msg) if "sucesso" in msg.lower() else st.error(msg)
         else:
             st.warning("Não há estoque disponível para este item.")
+            st.write("Atenção: Teste")
 
 # ➕ Aba Registrar Entrada
 elif aba == "➕ Registrar Entrada":
