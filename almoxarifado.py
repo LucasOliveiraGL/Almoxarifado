@@ -44,9 +44,10 @@ def upload_para_drive(file_path, file_id):
     service.files().update(fileId=file_id, media_body=media).execute()
 
 def carregar_usuarios():
-    if not CAMINHO_USUARIOS.exists():
-        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", CAMINHO_USUARIOS, quiet=True)
-    with open(CAMINHO_USUARIOS, "r", encoding="utf-8") as f:
+    caminho = str(CAMINHO_USUARIOS)  # ⬅️ conversão garantida para string
+    if not os.path.exists(caminho):
+        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", caminho, quiet=True)
+    with open(caminho, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def carregar_estoque():
