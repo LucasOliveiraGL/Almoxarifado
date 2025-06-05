@@ -46,7 +46,7 @@ def upload_para_drive(file_path, file_id):
 def carregar_usuarios():
     caminho = str(CAMINHO_USUARIOS)
     if not os.path.exists(caminho):
-        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", caminho, quiet=True)
+        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", str(CAMINHO_USUARIOS), quiet=True)
     with open(caminho, "r", encoding="utf-8") as f:
         return json.load(f)
 
