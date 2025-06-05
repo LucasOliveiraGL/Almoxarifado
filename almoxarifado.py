@@ -281,7 +281,7 @@ elif aba == "🧾 Relatório de Entradas":
         exportar_excel(df[filtro], "relatorio_entradas")
         
 elif aba == "🆕 Cadastrar Item":
-    st.subheader("🆕 Cadastrar Novo Item")
+    st.subheader("🆕 Cadastrar Novo Item Manualmente")
     with st.form("form_cadastro"):
         codigo = st.text_input("Código do Item")
         nome = st.text_input("Nome do Item")
@@ -307,6 +307,34 @@ elif aba == "🆕 Cadastrar Item":
                 registrar_log("cadastro", st.session_state["usuario_logado"], f"{quantidade}x {nome}")
                 st.success("Item cadastrado com sucesso!")
 
+    st.markdown("---")
+    st.subheader("📥 Cadastro em lote via Excel (.xlsx)")
+
+    arquivo_xlsx = st.file_uploader("Selecione o arquivo", type=["xlsx"])
+    if arquivo_xlsx:
+        try:
+            df_novos = pd.read_excel(arquivo_xlsx)
+            df_novos.columns = df_novos.columns.str.strip().str.lower().str.replace(" ", "_")
+            colunas_esperadas = ["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"]
+
+            if not all(col in df_novos.columns for col in colunas_esperadas):
+                st.error(f"O arquivo deve conter as colunas: {', '.join(colunas_esperadas)}")
+            else:
+                df_estoque = carregar_estoque()
+                duplicados = df_novos[df_novos["codigo"].isin(df_estoque["codigo"])]
+                if not duplicados.empty:
+                    st.warning(f"Atenção: os seguintes códigos já existem e foram ignorados: {', '.join(duplicados['codigo'].astype(str))}")
+                    df_novos = df_novos[~df_novos["codigo"].isin(df_estoque["codigo"])]
+
+                df_resultado = pd.concat([df_estoque, df_novos], ignore_index=True)
+                salvar_estoque(df_resultado)
+
+                for _, row in df_novos.iterrows():
+                    registrar_log("cadastro_lote", st.session_state["usuario_logado"], f"{row['quantidade']}x {row['nome']}")
+
+                st.success(f"{len(df_novos)} itens cadastrados com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao processar o arquivo: {e}")
 elif aba == "🛠 Editar / Remover":
     st.subheader("🛠 Editar ou Remover Itens")
     df = carregar_estoque()
