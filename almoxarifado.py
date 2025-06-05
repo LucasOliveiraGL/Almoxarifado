@@ -177,38 +177,23 @@ else:
 aba = st.sidebar.radio("Menu", abas)
 
 # Aba de login (ajustada para usar JSON de usuários)
-elif aba == "🔐 Login Admin":
-    st.markdown("<h2 style='text-align: center;'>🔐 Acesso ao Sistema</h2>", unsafe_allow_html=True)
-
-    with st.container():
-        st.markdown("### Informe suas credenciais abaixo:")
-        with st.form("form_login", clear_on_submit=True):
-            col1, col2 = st.columns([1, 3])
-            with col2:
-                usuario = st.text_input("👤 Usuário")
-                senha = st.text_input("🔑 Senha", type="password")
-                entrar = st.form_submit_button("🔓 Entrar")
-
+if aba == "🔐 Login Admin":
+    st.subheader("🔐 Login do Administrador")
+    with st.form("form_login"):
+        usuario = st.text_input("Usuário")
+        senha = st.text_input("Senha", type="password")
+        entrar = st.form_submit_button("Entrar")
         if entrar:
-            try:
-                usuarios_permitidos = carregar_usuarios()
-                cred_valida = any(
-                    u["usuario"] == usuario and u["senha"] == senha
-                    for u in usuarios_permitidos.get("usuarios", [])
-                )
-
-                if cred_valida:
-                    st.session_state["logado"] = True
-                    st.session_state["usuario_logado"] = usuario
-                    registrar_log("login", usuario, "Acesso autorizado")
-                    st.success("✅ Login realizado com sucesso!")
-                    st.experimental_rerun()
-                else:
-                    registrar_log("tentativa_login", usuario, "Acesso negado")
-                    st.error("❌ Usuário ou senha inválidos.")
-            except Exception as e:
-                st.error(f"Erro ao carregar lista de usuários: {e}")
-
+            cred_valida = any(u["usuario"] == usuario and u["senha"] == senha for u in usuarios_permitidos["usuarios"])
+            if cred_valida:
+                st.session_state["logado"] = True
+                st.session_state["usuario_logado"] = usuario
+                registrar_log("login", usuario, "Acesso autorizado")
+                st.success("Login realizado com sucesso! Recarregando...")
+                st.rerun()
+            else:
+                registrar_log("tentativa_login", usuario, "Acesso negado")
+                st.error("Usuário ou senha inválidos.")
 # Aba logout
 elif aba == "🚪 Logout":
     registrar_log("logout", st.session_state.get("usuario_logado", "admin"), "Encerrando sessão")
