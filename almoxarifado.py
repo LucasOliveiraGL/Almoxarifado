@@ -229,9 +229,9 @@ elif aba == "📤 Registrar Saída":
             if st.button("Registrar Saída"):
                 msg = registrar_saida(item["codigo"], qtd_saida, solicitante, observacao)
                 st.success(msg) if "sucesso" in msg.lower() else st.error(msg)
+                st.write("Atenção: Teste")
         else:
-            st.warning("Não há estoque disponível para este item.")
-            st.write("Atenção: Teste")
+            st.warning("Não há estoque disponível para este item.")            
 
 # ➕ Aba Registrar Entrada
 elif aba == "➕ Registrar Entrada":
