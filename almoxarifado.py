@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 from datetime import datetime
 from pathlib import Path
 import gdown
@@ -10,23 +11,27 @@ import json
 import altair as alt
 from io import BytesIO
 
-#=======
-#BLOCO 1
-#=======
-
+#======= CONFIGS INICIAIS =======
 if "logado" not in st.session_state:
     st.session_state["logado"] = False
+if "usuario_logado" not in st.session_state:
+    st.session_state["usuario_logado"] = ""
 
 ID_ESTOQUE = "1tWBClg4tzpt-kT8rp3MwdFRlKM-LBKRm"
 ID_SAIDAS = "1T2rxhL_n7rI4-JPI78scY86noS7C4Pns"
 ID_ENTRADAS = "1KhKIpEGhYYDB4oeKwWnIFVhnGtSWTrl-"
+ID_LOG = "1FTLwzESqCMNU3mpw23UJmpn6Akm0n5K9"
+ID_USUARIOS = "11FDvvNeNAkIKeqHN0P_R_qDA7coXKZfT"
 
 PASTA_DADOS = Path("data")
 PASTA_DADOS.mkdir(exist_ok=True)
 CAMINHO_ESTOQUE = PASTA_DADOS / "estoque.csv"
 CAMINHO_SAIDAS = PASTA_DADOS / "saidas.csv"
 CAMINHO_ENTRADAS = PASTA_DADOS / "entradas.csv"
+CAMINHO_LOG = PASTA_DADOS / "log.csv"
+CAMINHO_USUARIOS = PASTA_DADOS / "usuarios.json"
 
+#======= FUNÇÕES UTILITÁRIAS =======
 def baixar_csv_do_drive(id_arquivo, destino_local):
     url = f"https://drive.google.com/uc?id={id_arquivo}"
     gdown.download(url, destino_local, quiet=True)
@@ -38,10 +43,26 @@ def upload_para_drive(file_path, file_id):
     media = MediaFileUpload(file_path, mimetype="text/csv")
     service.files().update(fileId=file_id, media_body=media).execute()
 
+def carregar_usuarios():
+    caminho = str(CAMINHO_USUARIOS)
+    if not os.path.exists(caminho):
+        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", caminho, quiet=True)
+    with open(caminho, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 def carregar_estoque():
-    if not CAMINHO_ESTOQUE.exists():
-        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
-    return pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
+    try:
+        if not CAMINHO_ESTOQUE.exists():
+            baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
+        df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
+        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+        return df
+    except:
+        return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"])
+    
+#=======   
+#Bloco 2
+#=======
 
 def salvar_estoque(df):
     df.to_csv(CAMINHO_ESTOQUE, index=False)
@@ -65,6 +86,25 @@ def salvar_entradas(df):
     df.to_csv(CAMINHO_ENTRADAS, index=False)
     upload_para_drive(CAMINHO_ENTRADAS, ID_ENTRADAS)
 
+def registrar_log(acao, usuario, detalhes):
+    colunas = ["data", "usuario", "acao", "detalhes"]
+    nova_linha = pd.DataFrame([{
+        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "usuario": usuario,
+        "acao": acao,
+        "detalhes": detalhes
+    }])
+    try:
+        if not CAMINHO_LOG.exists():
+            baixar_csv_do_drive(ID_LOG, CAMINHO_LOG)
+        df_log = pd.read_csv(CAMINHO_LOG)
+    except:
+        df_log = pd.DataFrame(columns=colunas)
+
+    df_log = pd.concat([df_log, nova_linha], ignore_index=True)
+    df_log.to_csv(CAMINHO_LOG, index=False)
+    upload_para_drive(CAMINHO_LOG, ID_LOG)
+
 def registrar_saida(codigo, quantidade, solicitante, observacao):
     df_estoque = carregar_estoque()
     df_saidas = carregar_saidas()
@@ -81,6 +121,7 @@ def registrar_saida(codigo, quantidade, solicitante, observacao):
     }])
     df_saidas = pd.concat([df_saidas, nova_saida], ignore_index=True)
     salvar_saidas(df_saidas)
+    registrar_log("saida", solicitante, f"{quantidade}x {item['nome']}")
     return "Saída registrada com sucesso!"
 
 def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observacao):
@@ -99,25 +140,84 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
     }])
     df_entradas = pd.concat([df_entradas, nova], ignore_index=True)
     salvar_entradas(df_entradas)
+    registrar_log("entrada", st.session_state["usuario_logado"], f"{quantidade}x {df_estoque.loc[idx, 'nome']}")
     return "Entrada registrada com sucesso!"
 
-#=======
-#BLOCO 2
-#=======
+def exportar_excel(df, nome_base):
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False)
+    st.download_button("📥 Exportar Excel", buffer.getvalue(), file_name=f"{nome_base}.xlsx")
 
-# Interface
+# Interface inicial
 st.set_page_config("Sistema de Almoxarifado", layout="wide")
 st.title("📦 Sistema de Almoxarifado")
 
+# ========
+# BLOCO: CARREGAR USUÁRIOS DO JSON DO GOOGLE DRIVE
+# ========
+CAMINHO_USUARIOS = PASTA_DADOS / "usuarios.json"
+ID_USUARIOS = "11FDvvNeNAkIKeqHN0P_R_qDA7coXKZfT"
+
+def carregar_usuarios():
+    if not CAMINHO_USUARIOS.exists():
+        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", CAMINHO_USUARIOS, quiet=True)
+    with open(CAMINHO_USUARIOS, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+usuarios_permitidos = carregar_usuarios()
+
+# Aba lateral com menu
 abas = ["📤 Registrar Saída"]
 if st.session_state["logado"]:
-    abas += ["📊 Visão Geral", "📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas",
-             "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover", "🚪 Logout"]
+    abas += ["📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas", "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover", "🚪 Logout"]
 else:
     abas += ["🔐 Login Admin"]
 
 aba = st.sidebar.radio("Menu", abas)
 
+# Aba de login (ajustada para usar JSON de usuários)
+elif aba == "🔐 Login Admin":
+    st.markdown("<h2 style='text-align: center;'>🔐 Acesso ao Sistema</h2>", unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown("### Informe suas credenciais abaixo:")
+        with st.form("form_login", clear_on_submit=True):
+            col1, col2 = st.columns([1, 3])
+            with col2:
+                usuario = st.text_input("👤 Usuário")
+                senha = st.text_input("🔑 Senha", type="password")
+                entrar = st.form_submit_button("🔓 Entrar")
+
+        if entrar:
+            try:
+                usuarios_permitidos = carregar_usuarios()
+                cred_valida = any(
+                    u["usuario"] == usuario and u["senha"] == senha
+                    for u in usuarios_permitidos.get("usuarios", [])
+                )
+
+                if cred_valida:
+                    st.session_state["logado"] = True
+                    st.session_state["usuario_logado"] = usuario
+                    registrar_log("login", usuario, "Acesso autorizado")
+                    st.success("✅ Login realizado com sucesso!")
+                    st.experimental_rerun()
+                else:
+                    registrar_log("tentativa_login", usuario, "Acesso negado")
+                    st.error("❌ Usuário ou senha inválidos.")
+            except Exception as e:
+                st.error(f"Erro ao carregar lista de usuários: {e}")
+
+# Aba logout
+elif aba == "🚪 Logout":
+    registrar_log("logout", st.session_state.get("usuario_logado", "admin"), "Encerrando sessão")
+    st.session_state["logado"] = False
+    st.session_state["usuario_logado"] = ""
+    st.success("Logout realizado.")
+    st.rerun()
+
+# 📋 Aba Estoque
 if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
     df = carregar_estoque()
@@ -125,11 +225,15 @@ if aba == "📋 Estoque":
         st.warning("Estoque vazio.")
     else:
         df["Situação"] = df.apply(lambda row: "🔴 Baixo Estoque" if row["quantidade"] < row["estoque_minimo"] else "✅ Ok", axis=1)
-        st.dataframe(df.style.applymap(
-            lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #4a4a4a",
-            subset=["Situação"]
-        ), use_container_width=True)
+        st.dataframe(
+            df.style.applymap(
+                lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #4a4a4a",
+                subset=["Situação"]
+            ),
+            use_container_width=True
+        )
 
+# 📤 Aba Registrar Saída
 elif aba == "📤 Registrar Saída":
     st.subheader("📤 Registrar Saída de Item")
     df = carregar_estoque()
@@ -141,7 +245,7 @@ elif aba == "📤 Registrar Saída":
         qtd_disponivel = int(item["quantidade"])
         if qtd_disponivel > 0:
             qtd_saida = st.number_input("Quantidade a dar saída:", min_value=1, max_value=qtd_disponivel)
-            solicitante = st.text_input("Solicitante")
+            solicitante = st.text_input("Solicitante", value=st.session_state.get("usuario_logado", ""))
             observacao = st.text_area("Observação")
             if st.button("Registrar Saída"):
                 msg = registrar_saida(item["codigo"], qtd_saida, solicitante, observacao)
@@ -149,6 +253,7 @@ elif aba == "📤 Registrar Saída":
         else:
             st.warning("Não há estoque disponível para este item.")
 
+# ➕ Aba Registrar Entrada
 elif aba == "➕ Registrar Entrada":
     st.subheader("➕ Registrar Entrada de Itens")
     df = carregar_estoque()
@@ -163,9 +268,12 @@ elif aba == "➕ Registrar Entrada":
         fornecedor = st.text_input("Fornecedor (opcional)")
         observacao = st.text_area("Observação (opcional)")
         if st.button("Registrar Entrada"):
-            msg = registrar_entrada(item["codigo"], quantidade, tipo_entrada, documento, fornecedor, observacao)
+            msg = registrar_entrada(
+                item["codigo"], quantidade, tipo_entrada, documento, fornecedor, observacao
+            )
             st.success(msg) if "sucesso" in msg.lower() else st.error(msg)
 
+# 📄 Relatório de Saídas
 elif aba == "📄 Relatório de Saídas":
     st.subheader("📄 Relatório de Saídas")
     df = carregar_saidas()
@@ -173,11 +281,13 @@ elif aba == "📄 Relatório de Saídas":
         st.info("Nenhuma saída registrada.")
     else:
         df["data"] = pd.to_datetime(df["data"])
-        data_inicio = st.date_input("Data inicial", value=df["data"].min().date(), key="saida_ini")
-        data_fim = st.date_input("Data final", value=df["data"].max().date(), key="saida_fim")
+        data_inicio = st.date_input("Data inicial", value=df["data"].min().date())
+        data_fim = st.date_input("Data final", value=df["data"].max().date())
         filtro = (df["data"].dt.date >= data_inicio) & (df["data"].dt.date <= data_fim)
         st.dataframe(df[filtro], use_container_width=True)
+        exportar_excel(df[filtro], "relatorio_saidas")
 
+# 🧾 Relatório de Entradas
 elif aba == "🧾 Relatório de Entradas":
     st.subheader("🧾 Relatório de Entradas")
     df = carregar_entradas()
@@ -185,11 +295,12 @@ elif aba == "🧾 Relatório de Entradas":
         st.info("Nenhuma entrada registrada.")
     else:
         df["data"] = pd.to_datetime(df["data"])
-        data_inicio = st.date_input("Data inicial", value=df["data"].min().date(), key="ent_ini")
-        data_fim = st.date_input("Data final", value=df["data"].max().date(), key="ent_fim")
+        data_inicio = st.date_input("Data inicial", value=df["data"].min().date())
+        data_fim = st.date_input("Data final", value=df["data"].max().date())
         filtro = (df["data"].dt.date >= data_inicio) & (df["data"].dt.date <= data_fim)
         st.dataframe(df[filtro], use_container_width=True)
-
+        exportar_excel(df[filtro], "relatorio_entradas")
+        
 elif aba == "🆕 Cadastrar Item":
     st.subheader("🆕 Cadastrar Novo Item")
     with st.form("form_cadastro"):
@@ -205,11 +316,16 @@ elif aba == "🆕 Cadastrar Item":
                 st.error("Código já cadastrado.")
             else:
                 novo = pd.DataFrame([{
-                    "codigo": codigo, "nome": nome, "categoria": categoria,
-                    "quantidade": quantidade, "estoque_minimo": estoque_minimo, "estoque_maximo": estoque_maximo
+                    "codigo": codigo,
+                    "nome": nome,
+                    "categoria": categoria,
+                    "quantidade": quantidade,
+                    "estoque_minimo": estoque_minimo,
+                    "estoque_maximo": estoque_maximo
                 }])
                 df = pd.concat([df, novo], ignore_index=True)
                 salvar_estoque(df)
+                registrar_log("cadastro", st.session_state["usuario_logado"], f"{quantidade}x {nome}")
                 st.success("Item cadastrado com sucesso!")
 
 elif aba == "🛠 Editar / Remover":
@@ -232,42 +348,11 @@ elif aba == "🛠 Editar / Remover":
             if salvar:
                 df.loc[item_idx] = [codigo, nome, categoria, quantidade, estoque_minimo, estoque_maximo]
                 salvar_estoque(df)
+                registrar_log("editar", st.session_state["usuario_logado"], f"{codigo} atualizado")
                 st.success("Item atualizado com sucesso.")
             if remover:
+                nome_removido = df.loc[item_idx, "nome"]
                 df = df.drop(index=item_idx)
                 salvar_estoque(df)
+                registrar_log("remover", st.session_state["usuario_logado"], f"{nome_removido} excluído")
                 st.success("Item removido.")
-
-#=======
-#BLOCO 3
-#=======
-def exportar_excel(df, nome_base):
-    buffer = BytesIO()
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False)
-    st.download_button("📥 Exportar para Excel", buffer.getvalue(), file_name=f"{nome_base}.xlsx")
-
-def registrar_log(acao, usuario, detalhes):
-    CAMINHO_LOG = Path("data") / "log.csv"
-    colunas = ["data", "usuario", "acao", "detalhes"]
-    nova_linha = pd.DataFrame([{
-        "data": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "usuario": usuario,
-        "acao": acao,
-        "detalhes": detalhes
-    }])
-    try:
-        log_df = pd.read_csv(CAMINHO_LOG)
-    except FileNotFoundError:
-        log_df = pd.DataFrame(columns=colunas)
-
-    log_df = pd.concat([log_df, nova_linha], ignore_index=True)
-    log_df.to_csv(CAMINHO_LOG, index=False)
-    # Opcional: subir para o Google Drive
-
-# Exemplos de uso nos blocos anteriores:
-# registrar_log("entrada", "Bruna", f"{quantidade}x {item['nome']}")
-# registrar_log("saida", "Bruna", f"{quantidade}x {item['nome']} para {solicitante}")
-
-# Dentro de relatórios:
-# exportar_excel(df[filtro], "relatorio_entradas") ou "relatorio_saidas"
