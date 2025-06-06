@@ -219,8 +219,8 @@ elif st.session_state["aba"] == "logout":
     st.success("Logout realizado.")
     st.rerun()
 
-# 📤 Registrar Saída
-elif st.session_state["aba"] == "saida":
+# 📤 Aba Registrar Saída
+if aba == "📤 Registrar Saída":
     st.subheader("📤 Registrar Saída de Item")
     df = carregar_estoque()
     if df.empty:
