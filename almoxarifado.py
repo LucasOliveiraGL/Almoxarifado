@@ -45,8 +45,8 @@ def upload_para_drive(file_path, file_id):
 
 def carregar_estoque():
     try:
-        if not CAMINHO_ESTOQUE.exists():
-            baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
+        # SEMPRE baixa a versão mais recente do Google Drive
+        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
         df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
         return df
