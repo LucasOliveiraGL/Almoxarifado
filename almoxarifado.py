@@ -171,17 +171,21 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     if not st.session_state["logado"]:
+        if st.button("📤 Registrar Saída"):
+            st.session_state["aba"] = "📤 Registrar Saída"
+
         if st.button("🔐 Login Admin"):
             st.session_state["aba"] = "login"
+
     else:
         menu_itens = [
-            ("📤 Registrar Saída", "saida"),
-            ("📋 Estoque", "estoque"),
-            ("➕ Registrar Entrada", "entrada"),
-            ("📄 Relatório de Saídas", "rel_saida"),
-            ("🧾 Relatório de Entradas", "rel_entrada"),
-            ("🆕 Cadastrar Item", "cadastro"),
-            ("🛠 Editar / Remover", "editar"),
+            ("📤 Registrar Saída", "📤 Registrar Saída"),
+            ("📋 Estoque", "📋 Estoque"),
+            ("➕ Registrar Entrada", "➕ Registrar Entrada"),
+            ("📄 Relatório de Saídas", "📄 Relatório de Saídas"),
+            ("🧾 Relatório de Entradas", "🧾 Relatório de Entradas"),
+            ("🆕 Cadastrar Item", "🆕 Cadastrar Item"),
+            ("🛠 Editar / Remover", "🛠 Editar / Remover"),
             ("🚪 Logout", "logout")
         ]
         for label, chave in menu_itens:
