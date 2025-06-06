@@ -179,7 +179,7 @@ with st.sidebar:
 
     else:
         menu_itens = [
-            ("📤 Registrar Saída", "saidas"),
+            ("📤 Registrar Saída", "saida"),
             ("📋 Estoque", "estoque"),
             ("➕ Registrar Entrada", "entradas"),
             ("📄 Relatório de Saídas", "relatorio_saidas"),
