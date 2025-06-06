@@ -255,7 +255,7 @@ elif st.session_state["aba"] == "estoque":
         st.warning("Estoque vazio.")
     else:
         def classificar_situacao(row):
-            if row["quantidade"] == 0:
+            #if row["quantidade"] == 0:
                 return "⚠️ Sem Estoque"
             elif row["quantidade"] < row["estoque_minimo"]:
                 return "🟡 Baixo Estoque"
