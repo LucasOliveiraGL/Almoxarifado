@@ -231,11 +231,8 @@ if aba == "📋 Estoque":
                 subset=["Situação"]
             ),
             use_container_width=True,
-            height=40 * len(df) + 60  # altura adaptada
+            height=40 * len(df) + 55  # altura adaptada
         )
-
-        # Altura proporcional ao número de linhas (sem scroll)
-        #st.dataframe(styled_df, use_container_width=True, height=(len(df) * 40 + 80))
 
 
 # 📤 Aba Registrar Saída
