@@ -177,8 +177,8 @@ if "aba" in st.session_state:
     aba_selecionada = st.session_state["aba"]
 
 # Aba de login (ajustada para usar JSON de usuários)
-if aba_selecionada == "🔐 Login Admin":
-    st.header("🔐 Login do Administrador")
+if aba == "🔐 Login Admin":
+    st.subheader("🔐 Login do Administrador")
     with st.form("form_login"):
         usuario = st.text_input("Usuário")
         senha = st.text_input("Senha", type="password")
