@@ -168,7 +168,7 @@ if st.session_state["logado"]:
     menu_itens += [
         ("📋 Estoque", "estoque"),
         ("➕ Registrar Entrada", "entrada"),
-        ("📄 Relatório de Saídas", "relatorio_saida"),
+        ("📄 Relatório de Saídas", "relatorio_saidas"),
         ("🧾 Relatório de Entradas", "relatorio_entrada"),
         ("🆕 Cadastrar Item", "cadastrar"),
         ("🛠 Editar / Remover", "editar"),
