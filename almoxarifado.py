@@ -280,37 +280,33 @@ elif st.session_state["aba"] == "estoque":
         )
 
 # ➕ Registrar Entrada
-registro = st.form_submit_button("Registrar Entrada")
-
-if registro:
-    msg = registrar_entrada(
-        item["codigo"], quantidade, tipo_entrada, documento, fornecedor, observacao
-    )
-    st.session_state["msg_entrada"] = msg
-else:
-    st.session_state["msg_entrada"] = ""
-
-# Fora do `with st.form(...)`, exibe a mensagem
-if "msg_entrada" in st.session_state and st.session_state["msg_entrada"]:
-    if "sucesso" in st.session_state["msg_entrada"].lower():
-        st.success(st.session_state["msg_entrada"])
-    else:
-        st.error(st.session_state["msg_entrada"])
-
-# 📄 Relatório de Saídas
-elif st.session_state["aba"] == "relatorio_saidas":
-    st.subheader("📄 Relatório de Saídas")
-    df = carregar_saidas()
+elif aba == "➕ Registrar Entrada":
+    st.subheader("➕ Registrar Entrada de Itens")
+    df = carregar_estoque()
     if df.empty:
-        st.info("Nenhuma saída registrada.")
+        st.warning("Estoque vazio.")
     else:
-        df["data"] = pd.to_datetime(df["data"])
-        data_inicio = st.date_input("Data inicial", value=df["data"].min().date())
-        data_fim = st.date_input("Data final", value=df["data"].max().date())
-        filtro = (df["data"].dt.date >= data_inicio) & (df["data"].dt.date <= data_fim)
-        st.dataframe(df[filtro], use_container_width=True)
-        exportar_excel(df[filtro], "relatorio_saidas")
+        item_escolhido = st.selectbox("Selecione o item:", df["nome"])
+        item = df[df["nome"] == item_escolhido].iloc[0]
 
+        with st.form("form_entrada"):
+            tipo_entrada = st.radio("Tipo de Entrada", ["Nota Fiscal", "Manual"])
+            quantidade = st.number_input("Quantidade", min_value=1)
+            documento = st.text_input("Nº Nota Fiscal ou Documento", value="" if tipo_entrada == "Manual" else "")
+            fornecedor = st.text_input("Fornecedor (opcional)")
+            observacao = st.text_area("Observação (opcional)")
+            registro = st.form_submit_button("Registrar Entrada")
+
+        # Fora do st.form
+        if registro:
+            msg = registrar_entrada(
+                item["codigo"], quantidade, tipo_entrada, documento, fornecedor, observacao
+            )
+            if "sucesso" in msg.lower():
+                st.success(msg)
+            else:
+                st.error(msg)
+                
 # 🧾 Relatório de Entradas
 elif st.session_state["aba"] == "relatorio_entradas":
     st.subheader("🧾 Relatório de Entradas")
