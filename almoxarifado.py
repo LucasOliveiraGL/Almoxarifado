@@ -172,7 +172,7 @@ with st.sidebar:
 
     if not st.session_state["logado"]:
         if st.button("📤 Registrar Saída"):
-            st.session_state["aba"] = "📤 Registrar Saída"
+            st.session_state["aba"] = "saida"
 
         if st.button("🔐 Login Admin"):
             st.session_state["aba"] = "login"
