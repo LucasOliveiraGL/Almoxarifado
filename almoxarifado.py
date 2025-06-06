@@ -157,34 +157,36 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
     return "Entrada registrada com sucesso!"
 
 # ======= MENU LATERAL COM BOTÕES ======= #
-st.sidebar.markdown("### 📚 Menu")
+with st.sidebar:
+    st.markdown("### Menu")
 
-# Define itens do menu com rótulo visível e valor interno da aba
-menu_itens = [
-    ("📤 Registrar Saída", "📤 Registrar Saída")
-]
+    st.markdown("""
+        <style>
+        .element-container button {
+            width: 100% !important;
+            text-align: left !important;
+            justify-content: flex-start !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-if st.session_state["logado"]:
-    menu_itens += [
-        ("📋 Estoque", "estoque"),
-        ("➕ Registrar Entrada", "entrada"),
-        ("📄 Relatório de Saídas", "relatorio_saidas"),
-        ("🧾 Relatório de Entradas", "relatorio_entradas"),
-        ("🆕 Cadastrar Item", "cadastrar"),
-        ("🛠 Editar / Remover", "editar"),
-        ("🚪 Logout", "logout")
-    ]
-else:
-    menu_itens.append(("🔐 Login Admin", "🔐 Login Admin"))
-
-# Inicializa aba padrão
-if "aba" not in st.session_state:
-    st.session_state["aba"] = "📤 Registrar Saída"
-
-# Renderiza botões como menu
-for label, chave in menu_itens:
-    if st.sidebar.button(label):
-        st.session_state["aba"] = chave
+    if not st.session_state["logado"]:
+        if st.button("🔐 Login Admin"):
+            st.session_state["aba"] = "login"
+    else:
+        menu_itens = [
+            ("📤 Registrar Saída", "saida"),
+            ("📋 Estoque", "estoque"),
+            ("➕ Registrar Entrada", "entrada"),
+            ("📄 Relatório de Saídas", "rel_saida"),
+            ("🧾 Relatório de Entradas", "rel_entrada"),
+            ("🆕 Cadastrar Item", "cadastro"),
+            ("🛠 Editar / Remover", "editar"),
+            ("🚪 Logout", "logout")
+        ]
+        for label, chave in menu_itens:
+            if st.button(label):
+                st.session_state["aba"] = chave
 
 # Define aba ativa
 aba = st.session_state["aba"]
