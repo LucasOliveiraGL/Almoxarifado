@@ -179,13 +179,13 @@ with st.sidebar:
 
     else:
         menu_itens = [
-            ("📤 Registrar Saída", "📤 Registrar Saída"),
-            ("📋 Estoque", "📋 Estoque"),
-            ("➕ Registrar Entrada", "➕ Registrar Entrada"),
-            ("📄 Relatório de Saídas", "📄 Relatório de Saídas"),
-            ("🧾 Relatório de Entradas", "🧾 Relatório de Entradas"),
-            ("🆕 Cadastrar Item", "🆕 Cadastrar Item"),
-            ("🛠 Editar / Remover", "🛠 Editar / Remover"),
+            ("📤 Registrar Saída", "saidas"),
+            ("📋 Estoque", "estoque"),
+            ("➕ Registrar Entrada", "entradas"),
+            ("📄 Relatório de Saídas", "relatorio_saidas"),
+            ("🧾 Relatório de Entradas", "relatorio_entradas"),
+            ("🆕 Cadastrar Item", "cadastrar"),
+            ("🛠 Editar / Remover", "editar"),
             ("🚪 Logout", "logout")
         ]
         for label, chave in menu_itens:
