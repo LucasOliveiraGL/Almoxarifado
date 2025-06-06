@@ -364,4 +364,4 @@ elif aba == "🛠 Editar / Remover":
                 registrar_log("remover", st.session_state["usuario_logado"], f"{nome_removido} excluído")
                 st.success("Item removido.")
                 salvar = st.form_submit_button("Salvar Alterações")
-                remover = st.form_submit_button("Remover Item"
+                remover = st.form_submit_button("Remover Item")
