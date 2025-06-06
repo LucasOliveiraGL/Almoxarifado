@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import os
@@ -161,20 +162,13 @@ def carregar_usuarios():
 usuarios_permitidos = carregar_usuarios()
 
 # Aba lateral com menu
-abas = {
-    "📤 Registrar Saída": "saida",
-    "📚 Estoque": "estoque",
-    "➕ Registrar Entrada": "entrada",
-    "📄 Relatório de Saídas": "rel_saida",
-    "🧾 Relatório de Entradas": "rel_entrada",
-    "🆕 Cadastrar Item": "cadastro",
-    "🛠 Editar / Remover": "editar",
-    "🚪 Logout": "logout"
-}
+abas = ["📤 Registrar Saída"]
+if st.session_state["logado"]:
+    abas += ["📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas", "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover", "🚪 Logout"]
+else:
+    abas += ["🔐 Login Admin"]
 
-st.sidebar.markdown("### Menu")
-if "aba" in st.session_state:
-    aba_selecionada = st.session_state["aba"]
+aba = st.sidebar.radio("Menu", abas)
 
 # Aba de login (ajustada para usar JSON de usuários)
 if aba == "🔐 Login Admin":
@@ -203,7 +197,7 @@ elif aba == "🚪 Logout":
     st.rerun()
 
 # 📋 Aba Estoque
-if aba_selecionada == "Estoque":
+if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
 
     # Tentativa de sincronizar automaticamente com o Drive
