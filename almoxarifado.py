@@ -209,8 +209,10 @@ if aba == "📋 Estoque":
                 lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #4a4a4a",
                 subset=["Situação"]
             ),
-            use_container_width=True
+            use_container_width=True,
+            height=len(df) * 35 + 40  # altura proporcional ao número de linhas
         )
+
 
 # 📤 Aba Registrar Saída
 elif aba == "📤 Registrar Saída":
