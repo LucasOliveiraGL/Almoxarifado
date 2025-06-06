@@ -243,6 +243,13 @@ if aba == "📤 Registrar Saída":
 # 📋 Estoque
 elif st.session_state["aba"] == "estoque":
     st.subheader("📋 Estoque Atual")
+
+    # Força sincronização do estoque com o Drive antes de carregar
+    try:
+        baixar_csv_do_drive(ID_ESTOQUE, str(CAMINHO_ESTOQUE))
+    except Exception as e:
+        st.error(f"Erro ao atualizar estoque do Drive: {e}")
+    
     df = carregar_estoque()
     if df.empty:
         st.warning("Estoque vazio.")
