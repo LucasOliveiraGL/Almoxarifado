@@ -204,11 +204,16 @@ elif aba == "🚪 Logout":
 if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
     df = carregar_estoque()
+
+    # Remove linhas com código ou nome em branco (linhas extras no CSV)
+    df = df.dropna(subset=["codigo", "nome"])
+    df = df[df["codigo"].astype(str).str.strip() != ""]
+    df = df[df["nome"].astype(str).str.strip() != ""]
+
     if df.empty:
         st.warning("Estoque vazio.")
     else:
-        # Define a situação conforme a quantidade
-        def situacao(row):
+        def classificar_situacao(row):
             if row["quantidade"] == 0:
                 return "⚠️ Sem Estoque"
             elif row["quantidade"] < row["estoque_minimo"]:
@@ -216,14 +221,17 @@ if aba == "📋 Estoque":
             else:
                 return "✅ Ok"
 
-        df["Situação"] = df.apply(situacao, axis=1)
+        df["Situação"] = df.apply(classificar_situacao, axis=1)
 
-        # Aplica cores condicionalmente na coluna Situação
-        styled_df = df.style.applymap(
-            lambda val: "background-color: #FFF59D" if val == "🟡 Baixo Estoque"
-            else ("background-color: #FFCDD2" if val == "⚠️ Sem Estoque"
-                  else "background-color: #C8E6C9"),
-            subset=["Situação"]
+        st.dataframe(
+            df.style.applymap(
+                lambda val: "background-color: #FFF3CD" if val == "🟡 Baixo Estoque" else (
+                    "background-color: #FFCCCC" if val == "⚠️ Sem Estoque" else "background-color: #4a4a4a"
+                ),
+                subset=["Situação"]
+            ),
+            use_container_width=True,
+            height=40 * len(df) + 60  # altura adaptada
         )
 
         # Altura proporcional ao número de linhas (sem scroll)
