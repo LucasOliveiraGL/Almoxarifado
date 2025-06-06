@@ -203,7 +203,7 @@ elif aba == "🚪 Logout":
     st.rerun()
 
 # 📋 Aba Estoque
-if aba == "📋 Estoque":
+if aba_selecionada == "Estoque":
     st.subheader("📋 Estoque Atual")
 
     # Tentativa de sincronizar automaticamente com o Drive
