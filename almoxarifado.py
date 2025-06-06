@@ -273,8 +273,10 @@ elif st.session_state["aba"] == "estoque":
                 return "background-color: #4a4a4a; color: lightgreen"
             return ""
 
-        styled_df = df.style.applymap(colorir_situacao, subset=["Situação"])
-        st.dataframe(styled_df, use_container_width=True)
+        st.dataframe(
+            df.style.applymap(cor_situacao, subset=["Situação"]),
+            use_container_width=True,
+            height=35 * len(df) + 80
 
 # ➕ Registrar Entrada
 elif st.session_state["aba"] == "entrada":
