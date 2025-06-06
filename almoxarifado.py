@@ -347,21 +347,28 @@ elif aba == "🛠 Editar / Remover":
             codigo = st.text_input("Código", value=df.loc[item_idx, "codigo"])
             nome = st.text_input("Nome", value=df.loc[item_idx, "nome"])
             categoria = st.text_input("Categoria", value=df.loc[item_idx, "categoria"])
-            quantidade = st.number_input("Quantidade", value=int(df.loc[item_idx, "quantidade"]), step=1)
+
+            quantidade_raw = str(df.loc[item_idx, "quantidade"]).replace(",", ".")
+            try:
+                quantidade_int = int(float(quantidade_raw))
+            except:
+                quantidade_int = 0
+            quantidade = st.number_input("Quantidade", value=quantidade_int, step=1)
+
             estoque_minimo = st.number_input("Estoque Mínimo", value=int(df.loc[item_idx, "estoque_minimo"]), step=1)
             estoque_maximo = st.number_input("Estoque Máximo", value=int(df.loc[item_idx, "estoque_maximo"]), step=1)
+
             salvar = st.form_submit_button("Salvar Alterações")
             remover = st.form_submit_button("Remover Item")
-            if salvar:
-                df.loc[item_idx] = [codigo, nome, categoria, quantidade, estoque_minimo, estoque_maximo]
-                salvar_estoque(df)
-                registrar_log("editar", st.session_state["usuario_logado"], f"{codigo} atualizado")
-                st.success("Item atualizado com sucesso.")
-            if remover:
-                nome_removido = df.loc[item_idx, "nome"]
-                df = df.drop(index=item_idx)
-                salvar_estoque(df)
-                registrar_log("remover", st.session_state["usuario_logado"], f"{nome_removido} excluído")
-                st.success("Item removido.")
-                salvar = st.form_submit_button("Salvar Alterações")
-                remover = st.form_submit_button("Remover Item")
+
+    if salvar:
+        df.loc[item_idx] = [codigo, nome, categoria, quantidade, estoque_minimo, estoque_maximo]
+        salvar_estoque(df)
+        registrar_log("editar", st.session_state["usuario_logado"], f"{codigo} atualizado")
+        st.success("Item atualizado com sucesso.")
+    if remover:
+        nome_removido = df.loc[item_idx, "nome"]
+        df = df.drop(index=item_idx)
+        salvar_estoque(df)
+        registrar_log("remover", st.session_state["usuario_logado"], f"{nome_removido} excluído")
+        st.success("Item removido.")
