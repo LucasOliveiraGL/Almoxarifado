@@ -274,7 +274,7 @@ elif st.session_state["aba"] == "estoque":
             return ""
 
         st.dataframe(
-            df.style.applymap(cor_situacao, subset=["Situação"]),
+            df.style.applymap(colorir_situacao, subset=["Situação"]),
             use_container_width=True,
             height=35 * len(df) + 80
         )
