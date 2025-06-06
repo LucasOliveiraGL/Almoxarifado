@@ -233,7 +233,7 @@ if aba == "📋 Estoque":
                 subset=["Situação"]
             ),
             use_container_width=True,
-            height=min(1000, 40 + len(df) * 35)
+            height=min(1000, 40 + len(df) * 60)
         )
 
     except Exception as e:
