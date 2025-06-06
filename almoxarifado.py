@@ -231,7 +231,7 @@ if aba == "📋 Estoque":
                 subset=["Situação"]
             ),
             use_container_width=True,
-            height=40 * len(df) + 55  # altura adaptada
+            height=40 * len(df) + 50  # altura adaptada
         )
 
 
