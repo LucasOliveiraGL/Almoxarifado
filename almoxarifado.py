@@ -203,15 +203,27 @@ if aba == "📋 Estoque":
     if df.empty:
         st.warning("Estoque vazio.")
     else:
-        df["Situação"] = df.apply(lambda row: "🔴 Baixo Estoque" if row["quantidade"] < row["estoque_minimo"] else "✅ Ok", axis=1)
-        st.dataframe(
-            df.style.applymap(
-                lambda val: "background-color: #FFCCCC" if val == "🔴 Baixo Estoque" else "background-color: #4a4a4a",
-                subset=["Situação"]
-            ),
-            use_container_width=True,
-            height=len(df) * 500  # altura proporcional ao número de linhas
+        # Define a situação conforme a quantidade
+        def situacao(row):
+            if row["quantidade"] == 0:
+                return "⚠️ Sem Estoque"
+            elif row["quantidade"] < row["estoque_minimo"]:
+                return "🟡 Baixo Estoque"
+            else:
+                return "✅ Ok"
+
+        df["Situação"] = df.apply(situacao, axis=1)
+
+        # Aplica cores condicionalmente na coluna Situação
+        styled_df = df.style.applymap(
+            lambda val: "background-color: #FFF59D" if val == "🟡 Baixo Estoque"
+            else ("background-color: #FFCDD2" if val == "⚠️ Sem Estoque"
+                  else "background-color: #C8E6C9"),
+            subset=["Situação"]
         )
+
+        # Altura proporcional ao número de linhas (sem scroll)
+        st.dataframe(styled_df, use_container_width=True, height=(len(df) * 40 + 80))
 
 
 # 📤 Aba Registrar Saída
