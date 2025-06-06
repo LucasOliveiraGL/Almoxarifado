@@ -45,13 +45,17 @@ def upload_para_drive(file_path, file_id):
 
 def carregar_estoque():
     try:
-        # SEMPRE baixa a versão mais recente do Google Drive
-        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
+        # SEMPRE baixa a versão mais atual do estoque do Google Drive, mesmo que já exista localmente
+        url = f"https://drive.google.com/uc?id={ID_ESTOQUE}"
+        gdown.download(url, str(CAMINHO_ESTOQUE), quiet=True, fuzzy=True)
+
         df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
         return df
-    except:
+    except Exception as e:
+        st.error(f"Erro ao carregar estoque: {e}")
         return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"])
+
     
 #=======   
 #Bloco 2
