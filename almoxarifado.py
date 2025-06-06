@@ -45,25 +45,13 @@ def upload_para_drive(file_path, file_id):
 
 def carregar_estoque():
     try:
-        # Sempre força atualização do Drive
-        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
-
+        if not CAMINHO_ESTOQUE.exists():
+            gdown.download(f"https://drive.google.com/uc?id={ID_ESTOQUE}", str(CAMINHO_ESTOQUE), quiet=True)
         df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
-
-        # Normaliza colunas
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-
-        # Remove linhas inválidas
-        df = df.dropna(subset=["codigo", "nome"])
-        df = df[df["codigo"].astype(str).str.strip() != ""]
-        df = df[df["nome"].astype(str).str.strip() != ""]
-
         return df
-    except Exception as e:
-        print("Erro ao carregar estoque:", e)
+    except:
         return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"])
-
-
     
 #=======   
 #Bloco 2
@@ -165,10 +153,9 @@ CAMINHO_USUARIOS = PASTA_DADOS / "usuarios.json"
 ID_USUARIOS = "11FDvvNeNAkIKeqHN0P_R_qDA7coXKZfT"
 
 def carregar_usuarios():
-    caminho = str(CAMINHO_USUARIOS)
-    if not os.path.exists(caminho):
-        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", caminho, quiet=True)
-    with open(caminho, "r", encoding="utf-8") as f:
+    if not CAMINHO_USUARIOS.exists():
+        gdown.download(f"https://drive.google.com/uc?id={ID_USUARIOS}", str(CAMINHO_USUARIOS), quiet=True)
+    with open(CAMINHO_USUARIOS, "r", encoding="utf-8") as f:
         return json.load(f)
 
 usuarios_permitidos = carregar_usuarios()
