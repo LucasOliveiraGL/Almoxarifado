@@ -192,7 +192,7 @@ aba = st.session_state["aba"]
 # ======= CONTEÚDO DAS ABAS BASEADO NO SESSION_STATE["aba"] =======
 usuarios_permitidos = carregar_usuarios()
 # 🔐 Aba Login
-if aba == "login":
+if aba == "🔐 Login Admin":
     st.subheader("🔐 Login do Administrador")
     with st.form("form_login"):
         usuario = st.text_input("Usuário")
