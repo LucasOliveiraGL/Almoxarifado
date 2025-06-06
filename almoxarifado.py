@@ -236,9 +236,6 @@ if aba == "📋 Estoque":
             use_container_width=True,
             height=35 * len(df) + 80  # Altura proporcional ao número de linhas
         )
-
-    except Exception as e:
-        st.error(f"Erro ao atualizar estoque do Drive: {e}")
         
 # 📤 Aba Registrar Saída
 elif aba == "📤 Registrar Saída":
