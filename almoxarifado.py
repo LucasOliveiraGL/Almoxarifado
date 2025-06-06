@@ -192,7 +192,7 @@ aba = st.session_state["aba"]
 # ======= CONTEÚDO DAS ABAS BASEADO NO SESSION_STATE["aba"] =======
 usuarios_permitidos = carregar_usuarios()
 # 🔐 Aba Login
-if st.session_state["aba"] == "login":
+if aba == "login":
     st.subheader("🔐 Login do Administrador")
     with st.form("form_login"):
         usuario = st.text_input("Usuário")
@@ -203,6 +203,7 @@ if st.session_state["aba"] == "login":
             if cred_valida:
                 st.session_state["logado"] = True
                 st.session_state["usuario_logado"] = usuario
+                st.session_state["aba"] = "📋 Estoque"  # Redireciona para estoque ao logar
                 registrar_log("login", usuario, "Acesso autorizado")
                 st.success("Login realizado com sucesso! Recarregando...")
                 st.rerun()
