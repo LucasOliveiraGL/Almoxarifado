@@ -25,7 +25,7 @@ if "aba" not in st.session_state:
 ID_ESTOQUE = "1tWBClg4tzpt-kT8rp3MwdFRlKM-LBKRm"
 ID_SAIDAS = "1T2rxhL_n7rI4-JPI78scY86noS7C4Pns"
 ID_ENTRADAS = "1KhKIpEGhYYDB4oeKwWnIFVhnGtSWTrl-"
-ID_LOG = "1FTLwzESqCMNU3mpw23UJmpn6Akm0n5K9"
+ID_LOG = "16n5_9vxy2xNyBw04cKvDFUo0jFST5OcG"
 ID_USUARIOS = "11FDvvNeNAkIKeqHN0P_R_qDA7coXKZfT"
 
 PASTA_DADOS = Path("data")
