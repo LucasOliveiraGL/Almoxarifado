@@ -161,17 +161,24 @@ def carregar_usuarios():
 usuarios_permitidos = carregar_usuarios()
 
 # Aba lateral com menu
-abas = ["📤 Registrar Saída"]
-if st.session_state["logado"]:
-    abas += ["📋 Estoque", "➕ Registrar Entrada", "📄 Relatório de Saídas", "🧾 Relatório de Entradas", "🆕 Cadastrar Item", "🛠 Editar / Remover", "🚪 Logout"]
-else:
-    abas += ["🔐 Login Admin"]
+abas = {
+    "📤 Registrar Saída": "saida",
+    "📚 Estoque": "estoque",
+    "➕ Registrar Entrada": "entrada",
+    "📄 Relatório de Saídas": "rel_saida",
+    "🧾 Relatório de Entradas": "rel_entrada",
+    "🆕 Cadastrar Item": "cadastro",
+    "🛠 Editar / Remover": "editar",
+    "🚪 Logout": "logout"
+}
 
-aba = st.sidebar.radio("Menu", abas)
+st.sidebar.markdown("### Menu")
+if "aba" in st.session_state:
+    aba_selecionada = st.session_state["aba"]
 
 # Aba de login (ajustada para usar JSON de usuários)
-if aba == "🔐 Login Admin":
-    st.subheader("🔐 Login do Administrador")
+if aba_selecionada == "🔐 Login Admin":
+    st.header("🔐 Login do Administrador")
     with st.form("form_login"):
         usuario = st.text_input("Usuário")
         senha = st.text_input("Senha", type="password")
