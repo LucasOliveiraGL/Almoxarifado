@@ -157,18 +157,24 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
     return "Entrada registrada com sucesso!"
 
 # ======= MENU LATERAL COM BOTÕES =======
-menu_itens = [
-    ("📤 Registrar Saída", "saida"),
-    ("📋 Estoque", "estoque"),
-    ("➕ Registrar Entrada", "entrada"),
-    ("📄 Relatório de Saídas", "relatorio_saidas"),
-    ("🧾 Relatório de Entradas", "relatorio_entradas"),
-    ("🆕 Cadastrar Item", "cadastrar"),
-    ("🛠 Editar / Remover", "editar"),
-    ("🚪 Logout", "logout"),
-]
+st.sidebar.markdown("### Menu")
 
-usuarios_permitidos = carregar_usuarios()
+abas = ["📤 Registrar Saída"]
+if st.session_state["logado"]:
+    abas += [
+        "📋 Estoque",
+        "➕ Registrar Entrada",
+        "📄 Relatório de Saídas",
+        "🧾 Relatório de Entradas",
+        "🆕 Cadastrar Item",
+        "🛠 Editar / Remover",
+        "🚪 Logout"
+    ]
+else:
+    abas += ["🔐 Login Admin"]
+
+aba = st.sidebar.radio("Menu", abas)
+
 # Inicia a aba padrão se ainda não existir
 if "aba" not in st.session_state:
     st.session_state["aba"] = "saida"
@@ -185,7 +191,7 @@ with st.sidebar:
                 st.session_state["aba"] = chave
 
 # ======= CONTEÚDO DAS ABAS BASEADO NO SESSION_STATE["aba"] =======
-
+usuarios_permitidos = carregar_usuarios()
 # 🔐 Aba Login
 if st.session_state["aba"] == "login":
     st.subheader("🔐 Login do Administrador")
