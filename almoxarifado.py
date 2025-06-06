@@ -199,24 +199,22 @@ elif aba == "🚪 Logout":
 if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
 
-    # Sempre baixa do Drive para garantir sincronização
     try:
-        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
-    except Exception as e:
-        st.error(f"Erro ao atualizar estoque do Drive: {e}")
+        # Baixar o estoque sempre que abrir a aba (sincronização automática)
+        gdown.download(f"https://drive.google.com/uc?id={ID_ESTOQUE}", str(CAMINHO_ESTOQUE), quiet=True)
 
-    df = carregar_estoque()
+        df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
+        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
-    # Remove linhas em branco ou inválidas
-    df = df.dropna(subset=["codigo", "nome"])
-    df = df[df["codigo"].astype(str).str.strip() != ""]
-    df = df[df["nome"].astype(str).str.strip() != ""]
+        # Remove linhas completamente vazias
+        df.dropna(how="all", inplace=True)
 
-    if df.empty:
-        st.warning("Estoque vazio.")
-    else:
-        # Classificação por status
-        def classificar_situacao(row):
+        # Garante tipos corretos para evitar erro na classificação
+        df["quantidade"] = pd.to_numeric(df["quantidade"], errors="coerce").fillna(0).astype(int)
+        df["estoque_minimo"] = pd.to_numeric(df["estoque_minimo"], errors="coerce").fillna(0).astype(int)
+
+        # Adiciona coluna Situação com 3 estados
+        def classificar_estoque(row):
             if row["quantidade"] == 0:
                 return "⚠️ Sem Estoque"
             elif row["quantidade"] < row["estoque_minimo"]:
@@ -224,26 +222,22 @@ if aba == "📋 Estoque":
             else:
                 return "✅ Ok"
 
-        df["Situação"] = df.apply(classificar_situacao, axis=1)
+        df["Situação"] = df.apply(classificar_estoque, axis=1)
 
-        # Cores para cada status
-        def colorir_situacao(val):
-            if val == "⚠️ Sem Estoque":
-                return "background-color: #FFCCCC"
-            elif val == "🟡 Baixo Estoque":
-                return "background-color: #FFF5CC"
-            elif val == "✅ Ok":
-                return "background-color: #D4D4D4"
-            return ""
-
-        # Altura dinâmica: 40px por linha + buffer
-        altura = 40 * len(df) + 60
-
+        # Mostra todos os itens sem rolagem oculta
         st.dataframe(
-            df.style.applymap(colorir_situacao, subset=["Situação"]),
+            df.style.applymap(
+                lambda val: "background-color: #FFF0F0" if val == "⚠️ Sem Estoque" else (
+                    "background-color: #FFFACD" if val == "🟡 Baixo Estoque" else "background-color: #2d2d2d"
+                ),
+                subset=["Situação"]
+            ),
             use_container_width=True,
-            height=altura
+            height=min(1000, 40 + len(df) * 35)
         )
+
+    except Exception as e:
+        st.error(f"Erro ao atualizar estoque do Drive: {e}")
         
 # 📤 Aba Registrar Saída
 elif aba == "📤 Registrar Saída":
