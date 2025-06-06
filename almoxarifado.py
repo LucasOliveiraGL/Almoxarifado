@@ -199,21 +199,17 @@ elif aba == "🚪 Logout":
 if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
 
+    # Tentativa de sincronizar automaticamente com o Drive
     try:
-        # Baixar o estoque sempre que abrir a aba (sincronização automática)
-        gdown.download(f"https://drive.google.com/uc?id={ID_ESTOQUE}", str(CAMINHO_ESTOQUE), quiet=True)
+        baixar_csv_do_drive(ID_ESTOQUE, str(CAMINHO_ESTOQUE))
+    except Exception as e:
+        st.error(f"Erro ao atualizar estoque do Drive: {e}")
 
-        df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
-        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    df = carregar_estoque()
 
-        # Remove linhas completamente vazias
-        df.dropna(how="all", inplace=True)
-
-        # Garante tipos corretos para evitar erro na classificação
-        df["quantidade"] = pd.to_numeric(df["quantidade"], errors="coerce").fillna(0).astype(int)
-        df["estoque_minimo"] = pd.to_numeric(df["estoque_minimo"], errors="coerce").fillna(0).astype(int)
-
-        # Adiciona coluna Situação com 3 estados
+    if df.empty:
+        st.warning("Estoque vazio.")
+    else:
         def classificar_estoque(row):
             if row["quantidade"] == 0:
                 return "⚠️ Sem Estoque"
@@ -224,16 +220,21 @@ if aba == "📋 Estoque":
 
         df["Situação"] = df.apply(classificar_estoque, axis=1)
 
-        # Mostra todos os itens sem rolagem oculta
+        def cor_situacao(val):
+            if val == "⚠️ Sem Estoque":
+                return "background-color: #FFD6D6; color: red"
+            elif val == "🟡 Baixo Estoque":
+                return "background-color: #FFF5CC; color: orange"
+            elif val == "✅ Ok":
+                return "background-color: #2d2d2d; color: lightgreen"
+            return ""
+
+        styled_df = df.style.applymap(cor_situacao, subset=["Situação"])
+
         st.dataframe(
-            df.style.applymap(
-                lambda val: "background-color: #FFF0F0" if val == "⚠️ Sem Estoque" else (
-                    "background-color: #FFFACD" if val == "🟡 Baixo Estoque" else "background-color: #2d2d2d"
-                ),
-                subset=["Situação"]
-            ),
+            styled_df,
             use_container_width=True,
-            height=min(1000, 40 + len(df) * 60)
+            height=35 * len(df) + 80  # Altura proporcional ao número de linhas
         )
 
     except Exception as e:
