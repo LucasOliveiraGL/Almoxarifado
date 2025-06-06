@@ -156,39 +156,38 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
     registrar_log("entrada", st.session_state["usuario_logado"], f"{quantidade}x {df_estoque.loc[idx, 'nome']}")
     return "Entrada registrada com sucesso!"
 
-# ======= MENU LATERAL COM BOTÕES =======
-st.sidebar.markdown("### Menu")
+# ======= MENU LATERAL COM BOTÕES ======= #
+st.sidebar.markdown("### 📚 Menu")
 
-abas = ["📤 Registrar Saída"]
+# Define itens do menu com rótulo visível e valor interno da aba
+menu_itens = [
+    ("📤 Registrar Saída", "📤 Registrar Saída")
+]
+
 if st.session_state["logado"]:
-    abas += [
-        "📋 Estoque",
-        "➕ Registrar Entrada",
-        "📄 Relatório de Saídas",
-        "🧾 Relatório de Entradas",
-        "🆕 Cadastrar Item",
-        "🛠 Editar / Remover",
-        "🚪 Logout"
+    menu_itens += [
+        ("📋 Estoque", "📋 Estoque"),
+        ("➕ Registrar Entrada", "➕ Registrar Entrada"),
+        ("📄 Relatório de Saídas", "📄 Relatório de Saídas"),
+        ("🧾 Relatório de Entradas", "🧾 Relatório de Entradas"),
+        ("🆕 Cadastrar Item", "🆕 Cadastrar Item"),
+        ("🛠 Editar / Remover", "🛠 Editar / Remover"),
+        ("🚪 Logout", "🚪 Logout")
     ]
 else:
-    abas += ["🔐 Login Admin"]
+    menu_itens.append(("🔐 Login Admin", "🔐 Login Admin"))
 
-aba = st.sidebar.radio("Menu", abas)
-
-# Inicia a aba padrão se ainda não existir
+# Inicializa aba padrão
 if "aba" not in st.session_state:
-    st.session_state["aba"] = "saida"
+    st.session_state["aba"] = "📤 Registrar Saída"
 
-# Menu lateral com botões
-with st.sidebar:
-    st.markdown("### 📚 Menu")
-    if not st.session_state["logado"]:
-        if st.sidebar.button("🔐 Login Admin"):
-            st.session_state["aba"] = "login"
-    else:
-        for label, chave in menu_itens:
-            if st.sidebar.button(label):
-                st.session_state["aba"] = chave
+# Renderiza botões como menu
+for label, chave in menu_itens:
+    if st.sidebar.button(label):
+        st.session_state["aba"] = chave
+
+# Define aba ativa
+aba = st.session_state["aba"]
 
 # ======= CONTEÚDO DAS ABAS BASEADO NO SESSION_STATE["aba"] =======
 usuarios_permitidos = carregar_usuarios()
