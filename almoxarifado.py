@@ -277,6 +277,7 @@ elif st.session_state["aba"] == "estoque":
             df.style.applymap(cor_situacao, subset=["Situação"]),
             use_container_width=True,
             height=35 * len(df) + 80
+        )
 
 # ➕ Registrar Entrada
 elif st.session_state["aba"] == "entrada":
