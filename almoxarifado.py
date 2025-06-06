@@ -166,7 +166,7 @@ menu_itens = [
 
 if st.session_state["logado"]:
     menu_itens += [
-        ("📋 Estoque", "Estoque"),
+        ("📋 Estoque", "estoque"),
         ("➕ Registrar Entrada", "➕ Registrar Entrada"),
         ("📄 Relatório de Saídas", "📄 Relatório de Saídas"),
         ("🧾 Relatório de Entradas", "🧾 Relatório de Entradas"),
