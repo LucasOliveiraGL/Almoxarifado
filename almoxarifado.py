@@ -169,7 +169,7 @@ if st.session_state["logado"]:
         ("📋 Estoque", "estoque"),
         ("➕ Registrar Entrada", "entrada"),
         ("📄 Relatório de Saídas", "relatorio_saidas"),
-        ("🧾 Relatório de Entradas", "relatorio_entrada"),
+        ("🧾 Relatório de Entradas", "relatorio_entradas"),
         ("🆕 Cadastrar Item", "cadastrar"),
         ("🛠 Editar / Remover", "editar"),
         ("🚪 Logout", "logout")
