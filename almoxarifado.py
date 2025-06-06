@@ -45,16 +45,24 @@ def upload_para_drive(file_path, file_id):
 
 def carregar_estoque():
     try:
-        # SEMPRE baixa a versão mais atual do estoque do Google Drive, mesmo que já exista localmente
-        url = f"https://drive.google.com/uc?id={ID_ESTOQUE}"
-        gdown.download(url, str(CAMINHO_ESTOQUE), quiet=True, fuzzy=True)
+        # Sempre força atualização do Drive
+        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
 
         df = pd.read_csv(CAMINHO_ESTOQUE, encoding="utf-8-sig")
+
+        # Normaliza colunas
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+
+        # Remove linhas inválidas
+        df = df.dropna(subset=["codigo", "nome"])
+        df = df[df["codigo"].astype(str).str.strip() != ""]
+        df = df[df["nome"].astype(str).str.strip() != ""]
+
         return df
     except Exception as e:
-        st.error(f"Erro ao carregar estoque: {e}")
+        print("Erro ao carregar estoque:", e)
         return pd.DataFrame(columns=["codigo", "nome", "categoria", "quantidade", "estoque_minimo", "estoque_maximo"])
+
 
     
 #=======   
@@ -203,9 +211,16 @@ elif aba == "🚪 Logout":
 # 📋 Aba Estoque
 if aba == "📋 Estoque":
     st.subheader("📋 Estoque Atual")
+
+    # Sempre baixa do Drive para garantir sincronização
+    try:
+        baixar_csv_do_drive(ID_ESTOQUE, CAMINHO_ESTOQUE)
+    except Exception as e:
+        st.error(f"Erro ao atualizar estoque do Drive: {e}")
+
     df = carregar_estoque()
 
-    # Remove linhas com código ou nome em branco (linhas extras no CSV)
+    # Remove linhas em branco ou inválidas
     df = df.dropna(subset=["codigo", "nome"])
     df = df[df["codigo"].astype(str).str.strip() != ""]
     df = df[df["nome"].astype(str).str.strip() != ""]
@@ -213,6 +228,7 @@ if aba == "📋 Estoque":
     if df.empty:
         st.warning("Estoque vazio.")
     else:
+        # Classificação por status
         def classificar_situacao(row):
             if row["quantidade"] == 0:
                 return "⚠️ Sem Estoque"
@@ -223,18 +239,25 @@ if aba == "📋 Estoque":
 
         df["Situação"] = df.apply(classificar_situacao, axis=1)
 
+        # Cores para cada status
+        def colorir_situacao(val):
+            if val == "⚠️ Sem Estoque":
+                return "background-color: #FFCCCC"
+            elif val == "🟡 Baixo Estoque":
+                return "background-color: #FFF5CC"
+            elif val == "✅ Ok":
+                return "background-color: #D4D4D4"
+            return ""
+
+        # Altura dinâmica: 40px por linha + buffer
+        altura = 40 * len(df) + 60
+
         st.dataframe(
-            df.style.applymap(
-                lambda val: "background-color: #FFF3CD" if val == "🟡 Baixo Estoque" else (
-                    "background-color: #FFCCCC" if val == "⚠️ Sem Estoque" else "background-color: #4a4a4a"
-                ),
-                subset=["Situação"]
-            ),
+            df.style.applymap(colorir_situacao, subset=["Situação"]),
             use_container_width=True,
-            height=40 * len(df)  # altura adaptada
+            height=altura
         )
-
-
+        
 # 📤 Aba Registrar Saída
 elif aba == "📤 Registrar Saída":
     st.subheader("📤 Registrar Saída de Item")
