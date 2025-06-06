@@ -293,11 +293,22 @@ elif st.session_state["aba"] == "entrada":
         documento = st.text_input("Nº Nota Fiscal ou Documento", value="" if tipo_entrada == "Manual" else "")
         fornecedor = st.text_input("Fornecedor (opcional)")
         observacao = st.text_area("Observação (opcional)")
-        if st.button("Registrar Entrada"):
+        registro = st.form_submit_button("Registrar Entrada")
+
+        if registro:
             msg = registrar_entrada(
                 item["codigo"], quantidade, tipo_entrada, documento, fornecedor, observacao
             )
-            st.success(msg) if "sucesso" in msg.lower() else st.error(msg)
+            st.session_state["msg_entrada"] = msg
+        else:
+            st.session_state["msg_entrada"] = ""
+
+        # Fora do `with st.form(...)`, exibe a mensagem
+        if "msg_entrada" in st.session_state and st.session_state["msg_entrada"]:
+            if "sucesso" in st.session_state["msg_entrada"].lower():
+                st.success(st.session_state["msg_entrada"])
+            else:
+                st.error(st.session_state["msg_entrada"])
 
 # 📄 Relatório de Saídas
 elif st.session_state["aba"] == "relatorio_saidas":
