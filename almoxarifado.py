@@ -156,7 +156,14 @@ def registrar_entrada(codigo, quantidade, tipo, documento, fornecedor, observaca
     registrar_log("entrada", st.session_state["usuario_logado"], f"{quantidade}x {df_estoque.loc[idx, 'nome']}")
     return "Entrada registrada com sucesso!"
 
-# ======= MENU LATERAL COM BOTÕES ======= #
+# Define aba padrão se ainda não existir
+if "aba" not in st.session_state:
+    st.session_state["aba"] = "📤 Registrar Saída"
+
+# Define variável local de controle da aba
+aba = st.session_state["aba"]
+
+# ======= MENU LATERAL COM BOTÕES =======
 with st.sidebar:
     st.markdown("### Menu")
 
@@ -176,7 +183,6 @@ with st.sidebar:
 
         if st.button("🔐 Login Admin"):
             st.session_state["aba"] = "login"
-
     else:
         menu_itens = [
             ("📤 Registrar Saída", "saida"),
@@ -192,7 +198,7 @@ with st.sidebar:
             if st.button(label):
                 st.session_state["aba"] = chave
 
-# Define aba ativa
+# Redefine aba ativa sempre com base no session_state
 aba = st.session_state["aba"]
 
 # ======= CONTEÚDO DAS ABAS BASEADO NO SESSION_STATE["aba"] =======
