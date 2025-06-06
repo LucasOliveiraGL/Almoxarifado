@@ -280,7 +280,7 @@ elif st.session_state["aba"] == "estoque":
         )
 
 # ➕ Registrar Entrada
-elif aba == "➕ Registrar Entrada":
+elif aba == "entrada":
     st.subheader("➕ Registrar Entrada de Itens")
     df = carregar_estoque()
     if df.empty:
