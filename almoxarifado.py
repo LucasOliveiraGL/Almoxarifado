@@ -194,7 +194,7 @@ aba = st.session_state["aba"]
 # ======= CONTEÚDO DAS ABAS BASEADO NO SESSION_STATE["aba"] =======
 usuarios_permitidos = carregar_usuarios()
 # 🔐 Aba Login
-if aba == "🔐 Login Admin":
+if aba == "login":
     st.subheader("🔐 Login do Administrador")
     with st.form("form_login"):
         usuario = st.text_input("Usuário")
@@ -223,7 +223,7 @@ elif st.session_state["aba"] == "logout":
     st.rerun()
 
 # 📤 Aba Registrar Saída
-if aba == "📤 Registrar Saída":
+if aba == "saida":
     st.subheader("📤 Registrar Saída de Item")
     df = carregar_estoque()
     if df.empty:
